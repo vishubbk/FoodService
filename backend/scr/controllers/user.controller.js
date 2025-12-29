@@ -1,7 +1,8 @@
 import userModel from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import foodModel from "../models/food.model.js"
+import foodModel from "../models/food.model.js";
+import FoodPartnerModel from "../models/foodPartner.model.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -45,8 +46,8 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log(req.body)
-    console.log(`hit this api`)
+    console.log(req.body);
+    console.log(`hit this api`);
 
     const existingUser = await userModel.findOne({ email: email });
 
@@ -82,7 +83,7 @@ export const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log(error.message)
+    console.log(error.message);
   }
 };
 
@@ -95,15 +96,41 @@ export const logOutUser = async (req, res) => {
   } catch (error) {}
 };
 
-
 export const getAllItemsUser = async (req, res) => {
   try {
-
-    const data = await foodModel.find()
+    const data = await foodModel.find();
 
     res.status(200).json({
       message: "Data fetch succesfull",
-      data
+      data,
     });
   } catch (error) {}
+};
+
+export const getFoodPartnerDetailsUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const data = await FoodPartnerModel
+      .findById(id)
+      .select("-password")
+      .lean();
+
+    if (!data) {
+      return res.status(404).json({
+        message: "Food partner not found",
+      });
+    }
+
+
+    res.status(200).json({
+      message: "Data fetched successfully",
+      data,
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
 };

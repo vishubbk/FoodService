@@ -1,11 +1,20 @@
-import React, { useEffect, useState } from "react";
+import {
+  Bookmark,
+  Home,
+  LogOut,
+  Moon,
+  Sun,
+  UserCircle, // <-- add this import
+  Video,
+} from "lucide-react";
+import { useContext, useEffect, useState } from "react";
+import { AppContext } from "../context/Context";
 
 const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [username, setUsername] = useState("");
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const { isDark, setIsDark } = useContext(AppContext);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -20,110 +29,102 @@ const Navbar = () => {
     setIsLoggedIn(false);
     setUsername("");
     setShowProfileMenu(false);
-    // if you use routing (react-router) you can redirect here
-    // e.g. navigate('/')
-  };
-
-  const handleLoginSubmit = (e) => {
-    e.preventDefault();
-    // ----- Demo login behavior -----
-    // In a real app replace this with API call to backend that returns a token + username
-    if (form.email && form.password) {
-      const fakeToken = btoa(form.email + ":" + form.password + ":" + Date.now());
-      localStorage.setItem("token", fakeToken);
-      localStorage.setItem("username", form.email.split("@")[0] || form.email);
-      setIsLoggedIn(true);
-      setUsername(form.email.split("@")[0] || form.email);
-      setForm({ email: "", password: "" });
-    } else {
-      alert("Please enter email and password (demo)");
-    }
   };
 
   return (
     <>
-      <nav className="w-full bg-white shadow-md px-4 md:px-8">
-        <div className="max-w-6xl mx-auto flex items-center justify-between h-16">
-          <div className="flex items-center gap-4">
-            <div className="text-2xl font-bold text-green-600">Food Service</div>
-            <div className="hidden md:flex items-center gap-2 text-sm text-gray-600">
-              <a href="/" className="hover:text-green-600 px-3 py-2 rounded-md">Home</a>
-              <a href="/about" className="hover:text-green-600 px-3 py-2 rounded-md">About</a>
+      <div className="fixed top-0 left-0 h-screen w-16">
+        {/* Logo */}
+        <div className="h-16 w-16 flex items-center justify-center border-b border-white/10 shrink-0">
+          <Video className={isDark ? "text-white" : "text-black"} size={28} />
+        </div>
+        <nav
+          className={`h-full w-16 hover:w-56 transition-all duration-300 border-r z-50 rounded-xl group overflow-hidden ${
+            isDark
+              ? "bg-[#1d1c1c] border-white/10 text-white"
+              : "bg-white border-black/10 text-black"
+          }`}
+        >
+          {/* Nav Items */}
+          <div className="flex flex-col gap-2 mt-4 px-2">
+            <NavItem icon={<Home />} label="Home" />
+            <NavItem icon={<Bookmark />} label="Saved" />
+            <NavItem icon={<UserCircle />} label="Profile" />{" "}
+            {/* Use profile icon */}
+          </div>
+
+          {/* Bottom Profile */}
+          <div className="absolute bottom-4 w-full px-2">
+            <button
+              onClick={() => setIsDark((prev) => !prev)}
+              className="w-full mb-3 px-3 py-2 text-xs rounded-md border flex items-center justify-center gap-2 hover:bg-black/10 dark:hover:bg-white/10"
+            >
+              {isDark ? <Sun size={24} /> : <Moon size={24} />}{" "}
+              {/* Sun and Moon icons */}
+
+            </button>
+            {isLoggedIn ? (
               <div className="relative">
                 <button
-                  onClick={() => setShowMoreMenu((s) => !s)}
-                  className="hover:text-green-600 px-3 py-2 rounded-md"
+                  onClick={() => setShowProfileMenu((s) => !s)}
+                  className="flex items-center gap-3 w-full px-3 py-2 rounded-md hover:bg-white/10 text-white"
                 >
-                  More
+                  <UserCircle
+                    size={32}
+                    className="bg-gradient-to-br from-pink-500 to-purple-500 rounded-full p-1"
+                  />{" "}
+                  {/* Profile icon */}
+                  <span className="hidden group-hover:block truncate">
+                    {username}
+                  </span>
                 </button>
-                {showMoreMenu && (
-                  <div className="absolute left-0 mt-2 w-40 bg-white border rounded shadow-lg z-20">
-                    <a href="/features" className="block px-4 py-2 text-sm hover:bg-gray-100">Features</a>
-                    <a href="/pricing" className="block px-4 py-2 text-sm hover:bg-gray-100">Pricing</a>
-                    <a href="/contact" className="block px-4 py-2 text-sm hover:bg-gray-100">Contact</a>
+
+                {showProfileMenu && (
+                  <div className="absolute left-16 bottom-0 w-40 bg-[#111] border border-white/10 rounded-md shadow-xl">
+                    <button className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/10">
+                      Profile
+                    </button>
+                    <button className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/10">
+                      Saved
+                    </button>
+                    <button
+                      onClick={logout}
+                      className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-white/10 flex items-center gap-2"
+                    >
+                      <LogOut size={16} /> Logout
+                    </button>
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-
-            {/* Right side - Login / Profile */}
-            <div className="relative">
-              {isLoggedIn ? (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setShowProfileMenu((s) => !s)}
-                    className="flex items-center gap-2 bg-green-50 border border-green-100 px-3 py-1 rounded-full text-sm"
-                  >
-                    <span className="w-8 h-8 rounded-full bg-green-300 flex items-center justify-center text-white text-sm uppercase">{(username || "U").charAt(0)}</span>
-                    <span className="hidden sm:inline">{username}</span>
-                  </button>
-                  {showProfileMenu && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg z-20">
-                      <a href="/profile" className="block px-4 py-2 text-sm hover:bg-gray-100">Profile</a>
-                      <a href="/orders" className="block px-4 py-2 text-sm hover:bg-gray-100">Orders</a>
-                      <button
-                        onClick={logout}
-                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => (window.location.href = "/#/login")}
-                    className="px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700"
-                  >
-                    Login
-                  </button>
-                  <a href="/#/signup" className="px-3 py-2 border rounded-md text-sm hover:bg-gray-50">Sign up</a>
-                </div>
-              )}
-            </div>
-
-            {/* Mobile menu toggle (simple) */}
-            <div className="md:hidden ml-2">
+            ) : (
               <button
-                onClick={() => {
-                  // For a real app implement a mobile menu
-                  alert("Open mobile menu (implement as needed)");
-                }}
-                className="p-2 rounded-md border"
+                onClick={() => (window.location.href = "/#/login")}
+                className={`w-full px-3 py-2 text-sm rounded-md ${
+                  isDark
+                    ? "bg-white text-black hover:bg-gray-200"
+                    : "bg-black text-white hover:bg-gray-800"
+                }`}
               >
-                <span className="sr-only">Open menu</span>
-                ☰
+                Login
               </button>
-            </div>
+            )}
           </div>
-        </div>
-      </nav>
+        </nav>
+      </div>
+      {/* page offset */}
+      <div className="ml-16 group-hover:ml-56 transition-all duration-300"></div>
     </>
   );
 };
+
+const NavItem = ({ icon, label }) => (
+  <a
+    href="#"
+    className="flex items-center gap-4 px-3 py-2 rounded-md hover:bg-black/10 dark:hover:bg-white/10"
+  >
+    <span className="shrink-0">{icon}</span>
+    <span className="hidden group-hover:block text-sm">{label}</span>
+  </a>
+);
 
 export default Navbar;

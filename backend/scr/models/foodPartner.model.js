@@ -26,6 +26,10 @@ const foodPartnerSchema = mongoose.Schema({
   address:{
     type:String,
 
+  },
+  connections:{
+    type:Number,
+    default:0
   }
 },{
   timestamps:true
